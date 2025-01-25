@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*.js": "javascriptreact"
+    },
+    "eslint.options": {
+        "extensions": [".js", ".jsx"]
+    },
+    "eslint.validate": ["javascript", "javascriptreact"],
+    "prettier.requireConfig": true,
+    "tailwindCSS.includeLanguages": {
+        "html": "html",
+        "javascript": "javascript",
+        "css": "css"
+    },
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "tailwindCSS.emmetCompletions": true
+}
