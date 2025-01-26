@@ -1,6 +1,7 @@
 const mongoose=require('mongoose')
 const path=require('path')
 const uuid=require('uuid')
+const fs=require('fs')
 
 const UploadText=require('../../models/UploadText');
 const File=require('../../models/File');
@@ -182,6 +183,60 @@ const handlePostDeclareUploadOver=async(ctx)=>{
     }
 
     const token=ctx.request.body.token;
+
+    if(!token)
+    {
+        ctx.status=400;
+        ctx.body={
+            code: 3,
+            message: 'lack info',
+        };
+        return;
+    }
+
+    const tokenContent=uploadToken.get(token);
+
+    if(!tokenContent)
+    {
+        ctx.status=400;
+        ctx.body={
+            code: 4,
+            message: 'invalid token',
+        };
+        return;
+    }
+
+    if(tokenContent.currentFilesNum!==tokenContent.filesNum)
+    {
+        const newUploadFiles=await UploadFiles.findById(tokenContent.UploadFilesId);
+
+        const files=newUploadFiles.files;
+
+        for(let i=0; i<files.length; i++)
+        {
+            const file=await File.findById(files[i]);
+
+            const filePath=file.filePath;
+
+            fs.unlink(filePath, (err)=>{
+                if(err)
+                {
+                    console.log(err);
+                }
+            });
+
+            await file.deleteOne();
+        }
+
+        await newUploadFiles.deleteOne();
+
+        ctx.status=400;
+        ctx.body={
+            code: 5,
+            message: `server destroy the uploaded files as the files' num is not enough`,
+        };
+        return;
+    }
 
     uploadToken.delete(token);
 
