@@ -3,7 +3,7 @@ const User=require('../../models/User');
 const { checkCaptcha }=require('../../utils/captcha');
 
 const handlePostLoginInfo=async(ctx)=>{
-    console.log(ctx);
+    console.log(['test','test'])
 
     const username=ctx.request.body.username;
     const password=ctx.request.body.password;

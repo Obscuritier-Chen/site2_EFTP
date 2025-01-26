@@ -71,40 +71,97 @@ const UploadResource=()=>{
     /*-------------------------上面基本是文件处理---------------------------- */
     const [title, setTitle]=useState('');
 
-    function submitFile()
+    async function uploadFile_require(filesNum, filesSize, title)
     {
-        const formData=new FormData();
-
-        formData.append('title', title);
-        files.forEach(file=>formData.append('files',file.file));
-        setFiles(produce((draft)=>{
-            for(let i=0;i<files.length;i++)
-                draft[i].uploading=true;
-        }))
-
-        axios.post('/upload/api/postFiles', formData,
-            {
-                headers:{
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+        return axios.post('/upload/api/postFiles/require', 
+        {
+            filesNum,
+            filesSize,
+            title,
+        },
+        {
+            headers:{
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
             }
-        )
-        .then(response=>{
         })
-        .catch(error=>{
-        });
+    }
+
+    async function uploadFiles_uplaod(token, file)
+    {
+        const formData=new FormData();//不到为啥必须用formData
+        formData.append('token', token);
+        formData.append('file', file);
+
+        return axios.post('/upload/api/postFiles/upload', formData,
+        {
+            headers:{
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+    }
+
+    async function uploadFiles_over(token)
+    {
+        return axios.post('/upload/api/postFiles/over', 
+        {
+            token,
+        },
+        {
+            headers:{
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+    }
+
+    async function uploadFilesProcess(title, files)
+    {
+        try
+        {
+            const filesNum=files.length;
+            const filesSize=calcFileSIzeSum();
+
+            const requireResponse=await uploadFile_require(filesNum, filesSize, title);
+
+            if(requireResponse.status!==200)
+                throw new Error({response:requireResponse.data, source:'require'});
+
+            const token=requireResponse.data.token;
+
+            for(let i=0;i<files.length;i++)
+            {
+                const uploadResponse=await uploadFiles_uplaod(token, files[i].file);
+
+                if(uploadResponse.status!==200)
+                    throw new Error({response:uploadResponse.data, source:'upload'});
+            }
+            
+            const overResponse= await uploadFiles_over(token);
+
+            if(overResponse.status!==200)
+                throw new Error({response:overResponse.data, source:'over'});
+            console.log(overResponse);
+        } catch(error){
+            console.log(error.response);
+        }
+    }
+
+    function checkFileSubmit()
+    {
+        if(!localStorage.getItem('token'))//登录检测?
+            return false;
+        if(title.length===0)
+            return false;
+        if(calcFileSIzeSum()>524288000||calcFileSIzeSum()===0)
+            return false;
+        return true;
     }
 
     function handleFileSubmitClick()
     {
-        if(calcFileSIzeSum()>524288000||calcFileSIzeSum()===0)
+        if(!checkFileSubmit())
             return;
-        if(title.length===0)
-            return;
-        if(!localStorage.getItem('token'))//登录检测?
-            return;
-        submitFile();
+
+        uploadFilesProcess(title, files);
     }
 
     return(

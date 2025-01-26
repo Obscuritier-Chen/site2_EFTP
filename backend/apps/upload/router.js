@@ -7,7 +7,6 @@ const {checkFileUploadMiddleware}=require('./file_upload_cheker_middleware');
 
 const router=new Router();
 
-
 router.post('/postText', koaBody({multipart: true}), handlePostUploadText);
 router.post('/postFiles/require', koaBody({multipart: true}), handlePostRequireUploadToken);
 router.post('/postFiles/upload',

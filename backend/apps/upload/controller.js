@@ -102,6 +102,8 @@ const handlePostRequireUploadToken=async(ctx)=>{
     const filesSize=ctx.request.body.filesSize;
     const title=ctx.request.body.title;
 
+    process.stdout.write("Hello from stdout\n");
+
     if(!filesNum||!filesSize)
     {
         ctx.status=400;
@@ -206,6 +208,16 @@ const handlePostUploadFiles=async(ctx)=>{
     //const {files, fields}=ctx.request;//request对象的files属性是上传的文件 fields是表单的字段
     //console.log(files, fields)
     //const title=fields.title && fields.title[0];
+    if(!ctx.request.files)
+    {
+        ctx.status=400;
+        ctx.body={
+            code: 2,
+            message: 'lack info',
+        };
+        return;
+    }
+
     const file=ctx.request.files.file;
     const token=ctx.request.body.token;
 
