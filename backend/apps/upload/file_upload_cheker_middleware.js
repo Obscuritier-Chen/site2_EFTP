@@ -2,8 +2,10 @@ const uuid=require('uuid');
 const Busboy=require('busboy');
 const path=require('path');
 const fs=require('fs');
+const { Mutex } = require('async-mutex');
 
 const uploadToken=new Map();
+const tokenMutex=new Map();
 
 const uploadDir = path.join(__dirname, '../../uploads');
 
@@ -19,6 +21,7 @@ async function checkFileUploadMiddleware(ctx, next)
             let currentFileSize = 0;
             let currentFilesNum = 0;
             let hasError = false;
+            let fileSize=0;
 
             busboy.on('field', (fieldname, value) => {
                 if (fieldname === 'token') {
@@ -59,8 +62,6 @@ async function checkFileUploadMiddleware(ctx, next)
                     file.destroy();
                     return reject({ code: 2, message: 'file exceed limit' });
                 }
-                currentFileSize += file.size;
-                currentFilesNum++;
 
                 file.on('limit', () => {
                   hasError = true;
@@ -73,6 +74,11 @@ async function checkFileUploadMiddleware(ctx, next)
                 const writeStream = fs.createWriteStream(saveTo);
                 file.pipe(writeStream);
 
+                fileSize=file.size;
+
+                //currentFileSize += file.size;
+                //currentFilesNum++;
+
                 fileInfo = {
                     size: 0,
                     originalFilename: filename,
@@ -83,7 +89,7 @@ async function checkFileUploadMiddleware(ctx, next)
                 });
             });
 
-            busboy.on('finish', () => {
+            busboy.on('finish', async () => {
                 if (hasError) return;
                 if (!fileInfo){
                     return reject({ code: 2, message: 'lack info' });
@@ -91,15 +97,30 @@ async function checkFileUploadMiddleware(ctx, next)
                 if(!token){
                     return reject({ code: 2, message: 'lack info' });
                 }
-                const tokenContent = uploadToken.get(token);
-                if (!tokenContent) {
-                    return reject({ code: 3, message: 'invalid token' });
+
+                let mutex = tokenMutex.get(token);
+                if(!mutex)
+                {
+                    mutex = new Mutex();
+                    tokenMutex.set(token, mutex);
                 }
-                tokenContent.currentFilesSize = currentFileSize;
-                tokenContent.currentFilesNum = currentFilesNum;
-                uploadToken.set(token, tokenContent);
-                ctx.request.files = { file: fileInfo }; // 存储文件信息
+
+                const release = await mutex.acquire();
+                try {
+                    const tokenContent = uploadToken.get(token);
+                    if (!tokenContent) {
+                        return reject({ code: 3, message: 'invalid token' });
+                    }
+                    tokenContent.currentFilesSize = tokenContent.currentFileSize + fileSize;
+                    tokenContent.currentFilesNum = tokenContent.currentFilesNum + 1;
+                    uploadToken.set(token, tokenContent);
+                } finally {
+                    release();
+                }
+
+                ctx.request.files = { file: fileInfo };
                 ctx.request.body = {token};
+
                 resolve(next());
             });
 

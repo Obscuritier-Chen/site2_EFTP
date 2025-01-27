@@ -9,6 +9,7 @@ const UploadFiles=require('../../models/UploadFiles');
 const loginCheck=require('../../utils/loginCheck');
 const { uploadToken }=require('./file_upload_cheker_middleware');
 const { console } = require('inspector');
+const { log } = require('console');
 
 async function checkUser(ctx)
 {
@@ -205,6 +206,8 @@ const handlePostDeclareUploadOver=async(ctx)=>{
         };
         return;
     }
+
+    //console.log(tokenContent);
 
     if(tokenContent.currentFilesNum!==tokenContent.filesNum)
     {
