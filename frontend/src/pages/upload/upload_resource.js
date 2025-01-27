@@ -92,10 +92,26 @@ const UploadResource=()=>{
         formData.append('token', token);
         formData.append('file', file);
 
+        let lastUpdateTime=Date.now(), lastUploadedBytes=0;
+
         return axios.post('/upload/api/postFiles/upload', formData,
         {
+
             headers:{
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            onUploadProgress: (progressEvent)=>{
+                const progress=(progressEvent.loaded/progressEvent.total).toFixed(4);
+                
+                const currentTime = Date.now();
+                const timeDiff = (currentTime - lastUpdateTime);
+                const uploadedBytesDiff = progressEvent.loaded - lastUploadedBytes;
+                const speed = (uploadedBytesDiff / timeDiff);
+
+                lastUpdateTime = currentTime;
+                lastUploadedBytes = progressEvent.loaded;
+
+                console.log(progress ,speed);
             }
         })
     }
@@ -115,6 +131,7 @@ const UploadResource=()=>{
 
     async function uploadFilesProcess(title, files)
     {
+        let token;
         try
         {
             const filesNum=files.length;
@@ -125,23 +142,41 @@ const UploadResource=()=>{
             if(requireResponse.status!==200)
                 throw new Error({response:requireResponse.data, source:'require'});
 
-            const token=requireResponse.data.token;
+            token=requireResponse.data.token;
 
-            for(let i=0;i<files.length;i++)
+            /*for(let i=0;i<files.length;i++)
             {
                 const uploadResponse=await uploadFiles_uplaod(token, files[i].file);
 
                 if(uploadResponse.status!==200)
                     throw new Error({response:uploadResponse.data, source:'upload'});
-            }
-            
-            const overResponse= await uploadFiles_over(token);
+            }*/
+            const uploadPromises=files.map((file)=>uploadFiles_uplaod(token, file.file));
+            const uploadResponses=await Promise.all(uploadPromises);
 
-            if(overResponse.status!==200)
-                throw new Error({response:overResponse.data, source:'over'});
-            console.log(overResponse);
+            for(let i=0;i<uploadResponses.length;i++)
+            {
+                if(uploadResponses[i].status!==200)
+                    throw new Error({response:uploadResponses[i].data, source:'upload'});
+            }
         } catch(error){
-            console.log(error.response);
+            /*if(error.source==='require')
+            {
+
+            }
+            else if(error.source==='upload')
+            {
+
+            }*/
+           console.log(error);
+        } finally{
+            if(token)
+            {
+                const overResponse= await uploadFiles_over(token);
+
+                if(overResponse.status!==200)
+                    console.log(overResponse.data);
+            }
         }
     }
 
