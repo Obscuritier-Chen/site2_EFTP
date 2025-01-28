@@ -97,8 +97,7 @@ const UplResCard=({ file, fileDelete })=>{
             </div>
             
             {
-                //!file.uploading ? null : 
-                <div className="flex flex-row items-center mt-1 text-[13px]">
+                !file.uploading ? null : <div className="flex flex-row items-center mt-1 text-[13px]">
                     <div className="flex-1 h-1.5 bg-gray-300 rounded-full">
                         <div style={{width: `${file.progress*100}%`}} className="h-full bg-blue-500 rounded-full"/>
                     </div>
