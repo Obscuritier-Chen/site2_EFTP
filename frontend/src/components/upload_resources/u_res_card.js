@@ -21,6 +21,15 @@ const UplResCard=({ file, fileDelete })=>{
         return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
     }
 
+    function formatUploadSpeed(speed)
+    {
+        if(speed === 0)
+            return '0 B/s';
+        const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'];
+        const i = Math.floor(Math.log(speed) / Math.log(1024));
+        return (speed / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+    }
+
     function determineFileType()
     {
         const mimeType = file.file.type;
@@ -88,12 +97,13 @@ const UplResCard=({ file, fileDelete })=>{
             </div>
             
             {
-                !file.uploading ? null : <div className="flex flex-row items-center mt-1 text-sm">
-                    <div className="w-4/5 h-1.5 bg-gray-300 rounded-full">
+                //!file.uploading ? null : 
+                <div className="flex flex-row items-center mt-1 text-[13px]">
+                    <div className="flex-1 h-1.5 bg-gray-300 rounded-full">
                         <div style={{width: `${file.progress*100}%`}} className="h-full bg-blue-500 rounded-full"/>
                     </div>
-                    <div className="ml-1">{file.progress===0 ? '' : `${file.progress*100}%`}</div>
-                    <div className="ml-3">{file.upload_speed}</div>
+                    <div className="ml-1.5 mr-1">{file.progress===0 ? '' : `${(file.progress*100).toFixed(2)}%`}</div>
+                    <div className="ml-auto mr-1">{formatUploadSpeed(file.speed)}</div>
                 </div>
             }
             

@@ -26,8 +26,8 @@ const UploadResource=()=>{
             {
                 id: Date.now(),//fileKey.current,
                 file,
-                progress: 0,
-                speed: 0,
+                progress: 0.3333,
+                speed: 1011.11,
                 ok: false,
                 uploading: false,
             }
@@ -73,6 +73,7 @@ const UploadResource=()=>{
 
     async function uploadFile_require(filesNum, filesSize, title)
     {
+
         return axios.post('/upload/api/postFiles/require', 
         {
             filesNum,
@@ -86,8 +87,14 @@ const UploadResource=()=>{
         })
     }
 
-    async function uploadFiles_uplaod(token, file)
+    async function uploadFiles_uplaod(token, file, id)
     {
+        setFiles((prevFiles)=>produce(prevFiles, draft=>{
+            const index=draft.findIndex((f)=>f.id===id);
+
+            draft[index].uploading=true;
+        }));
+
         const formData=new FormData();//不到为啥必须用formData
         formData.append('token', token);
         formData.append('file', file);
@@ -106,14 +113,27 @@ const UploadResource=()=>{
                 const currentTime = Date.now();
                 const timeDiff = (currentTime - lastUpdateTime);
                 const uploadedBytesDiff = progressEvent.loaded - lastUploadedBytes;
-                const speed = (uploadedBytesDiff / timeDiff);
+                const speed = (uploadedBytesDiff / timeDiff);//Bytes per millisecond
 
                 lastUpdateTime = currentTime;
                 lastUploadedBytes = progressEvent.loaded;
 
-                console.log(progress ,speed);
+                setFiles((prevFiles)=>produce(prevFiles, draft=>{
+                    const index=draft.findIndex((f)=>f.id===id);
+    
+                    draft[index].progress=progress;
+                    draft[index].speed=speed*1000;
+                }));
             }
         })
+        .then(()=>{//不太规范 但还算方便
+            setFiles((prevFiles)=>produce(prevFiles, draft=>{
+                const index=draft.findIndex((f)=>f.id===id);
+
+                draft[index].ok=true;
+                draft[index].uploading=false;
+            }));
+        });
     }
 
     async function uploadFiles_over(token)
@@ -151,7 +171,7 @@ const UploadResource=()=>{
                 if(uploadResponse.status!==200)
                     throw new Error({response:uploadResponse.data, source:'upload'});
             }*/
-            const uploadPromises=files.map((file)=>uploadFiles_uplaod(token, file.file));
+            const uploadPromises=files.map((file)=>uploadFiles_uplaod(token, file.file, file.id));
             const uploadResponses=await Promise.all(uploadPromises);
 
             for(let i=0;i<uploadResponses.length;i++)
