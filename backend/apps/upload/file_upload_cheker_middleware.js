@@ -142,6 +142,11 @@ async function checkFileUploadMiddleware(ctx, next)
             }
             else
             {
+                ctx.status = 500;
+                ctx.body = {
+                    code: -1,
+                    message: 'internal server error'
+                };
                 throw err;
             }
         });

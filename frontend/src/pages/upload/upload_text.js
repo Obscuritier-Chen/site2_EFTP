@@ -31,7 +31,7 @@ const UploadText=()=>{
 
     function uploadText()
     {
-        if(textNum===0|| !title)
+        if(textNum===0||!title)
         {
             setAlertContent('上传内容不得为空');
             setAlertExtraFunc();

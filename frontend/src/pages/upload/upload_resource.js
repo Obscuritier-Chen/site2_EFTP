@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import axios, { all } from "axios";
 import { produce } from "immer";
+import { useNavigate } from "react-router";
 
 import PageContainer from "../../components/page_container";
 import Header from "../../components/header";
@@ -10,6 +11,9 @@ import UplResCard from "../../components/upload_resources/u_res_card";
 import UplResHeader from "components/upload_resources/u_res_header";
 
 const UploadResource=()=>{
+    const [alertContent, setAlertContent]=useState(false);
+    const [alertExtraFunc, setAlertExtraFunc]=useState();
+
     const [files, setFiles]=useState([]);
     //const fileKey=useRef(0);//useRef保证不会因为组件更新而重置，但需要保证其与组件渲染无关
 
@@ -26,9 +30,9 @@ const UploadResource=()=>{
             {
                 id: Date.now(),//fileKey.current,
                 file,
-                progress: 0.3333,
-                speed: 1011.11,
-                ok: false,
+                progress: 0,
+                speed: 0,
+                ok: null,
                 uploading: false,
             }
         ]);
@@ -126,13 +130,25 @@ const UploadResource=()=>{
                 }));
             }
         })
-        .then(()=>{//不太规范 但还算方便
+        .then((response)=>{
             setFiles((prevFiles)=>produce(prevFiles, draft=>{
                 const index=draft.findIndex((f)=>f.id===id);
 
                 draft[index].ok=true;
                 draft[index].uploading=false;
             }));
+
+            return response;
+        })
+        .catch((error)=>{
+            setFiles((prevFiles)=>produce(prevFiles, draft=>{
+                const index=draft.findIndex((f)=>f.id===id);
+
+                draft[index].ok=false;
+                draft[index].uploading=false;
+            }));
+
+            return error.response;
         });
     }
 
@@ -152,6 +168,7 @@ const UploadResource=()=>{
     async function uploadFilesProcess(title, files)
     {
         let token;
+        let allSuccess=true;
         try
         {
             const filesNum=files.length;
@@ -161,58 +178,103 @@ const UploadResource=()=>{
 
             if(requireResponse.status!==200)
                 throw new Error({response:requireResponse.data, source:'require'});
+                
 
             token=requireResponse.data.token;
 
-            /*for(let i=0;i<files.length;i++)
-            {
-                const uploadResponse=await uploadFiles_uplaod(token, files[i].file);
-
-                if(uploadResponse.status!==200)
-                    throw new Error({response:uploadResponse.data, source:'upload'});
-            }*/
             const uploadPromises=files.map((file)=>uploadFiles_uplaod(token, file.file, file.id));
             const uploadResponses=await Promise.all(uploadPromises);
 
             for(let i=0;i<uploadResponses.length;i++)
-            {
                 if(uploadResponses[i].status!==200)
                     throw new Error({response:uploadResponses[i].data, source:'upload'});
-            }
-        } catch(error){
-            /*if(error.source==='require')
-            {
+        }
+        catch(error){
+            allSuccess=false;
 
+            setFiles((prevFiles)=>produce(prevFiles, (draft)=>{
+                draft.forEach((f)=>{
+                    f.uploading=false;
+                });
+            }));
+
+            if(error.source==='require')
+            {
+                setAlertContent('出现意外问题，请重试');
+                setAlertExtraFunc();
             }
             else if(error.source==='upload')
             {
-
-            }*/
-           console.log(error);
-        } finally{
+                error.code===-1 ? setAlertContent('文件途中失败，请重试') : setAlertContent('出现意外问题失败，请重试');
+                setAlertExtraFunc();
+            }
+        }
+        finally{
             if(token)
             {
+                setFiles((prevFiles)=>produce(prevFiles, (draft)=>{
+                    draft.forEach((f)=>{
+                        f.uploading=false;
+                    });
+                }));
+
                 const overResponse= await uploadFiles_over(token);
 
                 if(overResponse.status!==200)
-                    console.log(overResponse.data);
+                {
+                    allSuccess=false;
+
+                    setAlertContent('出现意外问题，请重试');
+                    setAlertExtraFunc();
+                }
+
+                if(allSuccess)
+                {
+                    setAlertContent('上传成功');
+                    setAlertExtraFunc(()=>{return ()=>{
+                        setTitle('');
+                        deleteAll()
+                    }});
+                }
             }
         }
     }
 
+    const navigate=useNavigate();
+
+    const [titleAlert, setTitleAlert]=useState(false);
+
     function checkFileSubmit()
     {
         if(!localStorage.getItem('token'))//登录检测?
+        {
+            setAlertContent('未登录');
+            setAlertExtraFunc(()=>{
+                return navigate('/login');
+            });
             return false;
+        }
+            
         if(title.length===0)
+        {
+            setTitleAlert(true);
             return false;
+        }
+            
         if(calcFileSIzeSum()>524288000||calcFileSIzeSum()===0)
+        {
+            setAlertContent('文件不符合要求');
+            setAlertExtraFunc();
             return false;
+        }
         return true;
     }
 
     function handleFileSubmitClick()
     {
+        setAlertContent(false);//只是一个临时的解决方案 感觉Alert应该有一个reset的方法
+        setAlertExtraFunc();
+
         if(!checkFileSubmit())
             return;
 
@@ -228,8 +290,10 @@ const UploadResource=()=>{
                     <div className="flex flex-col w-full px-[10%]">
                         <div className="flex flex-row items-center mt-6">
                             <label className="text-[17px] mb-0.5">标题:</label>
-                            <input className={`flex-1 h-6 ${title.length ? 'bg-white' : 'bg-gray-100'} border border-gray-300 rounded-md px-2 pt-0.5 pb-1 ml-3 focus:outline-none 
-                            focus:shadow-lg focus:bg-white focus:border-gray-400`} placeholder="输入标题" onInput={(e)=>{setTitle(e.target.value)}}/>
+                            <input className={`flex-1 h-6  border rounded-md px-2 pt-0.5 pb-1 ml-3 focus:outline-none 
+                            focus:shadow-lg focus:bg-white focus:border-gray-400
+                            ${titleAlert ? 'border-red-500' : 'border-gray-300'} ${title.length ? 'bg-white' : 'bg-gray-100'}`} 
+                            placeholder="输入标题" onInput={(e)=>{setTitle(e.target.value)}} onFocus={()=>{setTitleAlert(false)}} value={title}/>
                         </div>
                         <input type="file" id='file_upload' className="hidden" onChange={handleFileChange}/>{/* 我觉得dragover导致的内部元素变化会导致input在里面的话会被刷新 */}
                         <div className={`flex flex-col items-center justify-center h-60 mt-6 border border-gray-300 rounded-lg
@@ -266,6 +330,7 @@ const UploadResource=()=>{
                         </div>
                     </div>
                 </div>
+                <Alert initialContent={alertContent} extraFunc={alertExtraFunc}/>
             </Content>
         </PageContainer>
     );
