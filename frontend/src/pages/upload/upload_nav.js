@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import PageContainer from "../../components/page_container";
 import Header from "../../components/header";
 import Content from "../../components/content";
+import MainCard from "components/main_card";
 
 const UploadNav=()=>{
     const navigate=useNavigate();
@@ -11,7 +12,7 @@ const UploadNav=()=>{
         <PageContainer>
             <Header/>
             <Content>
-                <div className="flex flex-col w-full mt-4 pt-4 pb-6 px-5 bg-white rounded-lg shadow-lg">
+                <MainCard>
                     <div className="text-2xl pb-1">上传作品</div>
                     <div className="px-4 mt-4">
                         <div className="flex flex-col px-4 py-5 border rounded-xl border-gray-400 shadow-md">
@@ -55,7 +56,7 @@ const UploadNav=()=>{
                             </div>
                         </div>
                     </div>
-                </div>
+                </MainCard>
                 
             </Content>
         </PageContainer>

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import PageContainer from "../../components/page_container";
 import Header from "../../components/header";
 import Content from "../../components/content";
+import MainCard from "components/main_card";
 import Alert from "../../components/alert";
 import UplResCard from "../../components/upload_resources/u_res_card";
 import UplResHeader from "components/upload_resources/u_res_header";
@@ -250,7 +251,7 @@ const UploadResource=()=>{
         {
             setAlertContent('未登录');
             setAlertExtraFunc(()=>{
-                return navigate('/login');
+                return ()=>{navigate('/login');};
             });
             return false;
         }
@@ -285,7 +286,7 @@ const UploadResource=()=>{
         <PageContainer>
             <Header/>
             <Content>
-                <div className="flex flex-col w-full mt-4 pt-4 pb-6 px-5 bg-white rounded-lg shadow-lg">
+                <MainCard>
                     <div className="text-2xl pb-1">上传资源</div>
                     <div className="flex flex-col w-full px-[10%]">
                         <div className="flex flex-row items-center mt-6">
@@ -329,7 +330,7 @@ const UploadResource=()=>{
                             点击上传
                         </div>
                     </div>
-                </div>
+                </MainCard>
                 <Alert initialContent={alertContent} extraFunc={alertExtraFunc}/>
             </Content>
         </PageContainer>

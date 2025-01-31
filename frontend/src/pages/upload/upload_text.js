@@ -4,6 +4,7 @@ import axios from "axios";
 import PageContainer from "../../components/page_container";
 import Header from "../../components/header";
 import Content from "../../components/content";
+import MainCard from "components/main_card";
 import Alert from "../../components/alert";
 
 const UploadText=()=>{
@@ -69,7 +70,7 @@ const UploadText=()=>{
         <PageContainer>
             <Header/>
             <Content>
-                <div className="flex flex-col w-full mt-4 pt-4 pb-6 px-5 bg-white rounded-lg shadow-lg">
+                <MainCard>
                     <div className="text-2xl pb-1">上传文本</div>
                     <div className="flex flex-col w-full px-[10%]">
                         <div className="flex flex-row items-center mt-6">
@@ -95,7 +96,7 @@ const UploadText=()=>{
                             <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
                         </svg>
                     </div>
-                </div>
+                </MainCard>
                 <Alert initialContent={alertContent} extraFunc={alertExtraFunc}/>
             </Content>
         </PageContainer>
