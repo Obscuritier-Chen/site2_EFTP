@@ -4,6 +4,7 @@ import Home from './pages/home';
 import Signup from "./pages/signup";
 import Login from './pages/login';
 import Upload from './pages/upload';
+import Display from "./pages/display";
 
 const App=()=>{
     return(
@@ -13,6 +14,7 @@ const App=()=>{
                 <Route exact path="/signup" element={<Signup/>}/>
                 <Route exact path="/login" element={<Login/>}/>
                 <Route exact path="/upload/*" element={<Upload/>}/>
+                <Route exact path="/display/*" element={<Display/>}/>
             </Routes>
         </Router>
     );

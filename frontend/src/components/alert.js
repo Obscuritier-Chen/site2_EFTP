@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import infoIcon from '../assets/images/infoIcon.png'
 
+//完全是尸山 本来应当是在外面添加删除回调函数 就像对upload_resource中files的删除那样 懒得改了 使用是在父组件需要注意手动重设参数
 //每次必须重新给extraFunc!!!!
 const Alert=({initialContent, extraFunc=()=>{}})=>{//content为false是不显示 希望是正常的做法
     const [content, setContent]=useState(initialContent);
@@ -34,6 +35,6 @@ const Alert=({initialContent, extraFunc=()=>{}})=>{//content为false是不显示
             </div>
         </div>
     );
-}
+};
 
 export default Alert
