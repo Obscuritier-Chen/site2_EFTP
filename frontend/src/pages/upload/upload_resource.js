@@ -12,6 +12,24 @@ import UplResCard from "../../components/upload_resources/u_res_card";
 import UplResHeader from "components/upload_resources/u_res_header";
 
 const UploadResource=()=>{
+    const maxTextNum=5000;
+    const [textNum, setTextNum]=useState(0);
+    const [exceedTextLim, setExceedTextLim]=useState(false);
+    const [text, setText]=useState('');
+
+    function handleTextInput(event)
+    {
+        setText(event.target.value);
+        setTextNum(event.target.value.length);
+        if(event.target.value.length>maxTextNum)
+            setExceedTextLim(true);
+        else
+            setExceedTextLim(false);
+        //setTextareaHeight(event.target.scrollHeight);
+        event.target.style.height='auto';
+        event.target.style.height=`${event.target.scrollHeight}px`;
+    }
+
     const [alertContent, setAlertContent]=useState(false);
     const [alertExtraFunc, setAlertExtraFunc]=useState();
 
@@ -78,12 +96,18 @@ const UploadResource=()=>{
 
     async function uploadFile_require(filesNum, filesSize, title)
     {
+        // 将<和>转义成HTML实体
+        const sanitizedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // 使用encodeURIComponent确保换行符和空格被编码
+        const encodedText = encodeURIComponent(sanitizedText);
 
         return axios.post('/upload/api/postFiles/require', 
         {
             filesNum,
             filesSize,
             title,
+            text: encodedText,
         },
         {
             headers:{
@@ -234,7 +258,9 @@ const UploadResource=()=>{
                     setAlertContent('上传成功');
                     setAlertExtraFunc(()=>{return ()=>{
                         setTitle('');
-                        deleteAll()
+                        setText('');
+                        setTextNum(0);
+                        deleteAll();
                     }});
                 }
             }
@@ -268,6 +294,10 @@ const UploadResource=()=>{
             setAlertExtraFunc();
             return false;
         }
+
+        if(textNum>maxTextNum)
+            return false;
+
         return true;
     }
 
@@ -295,6 +325,15 @@ const UploadResource=()=>{
                             focus:shadow-lg focus:bg-white focus:border-gray-400
                             ${titleAlert ? 'border-red-500' : 'border-gray-300'} ${title.length ? 'bg-white' : 'bg-gray-100'}`} 
                             placeholder="输入标题" onInput={(e)=>{setTitle(e.target.value)}} onFocus={()=>{setTitleAlert(false)}} value={title}/>
+                        </div>
+                        <div className="relative flex flex-col mt-1">
+                            <div className="text-[17px]">内容:</div>
+                            <div className="pl-[51px] mt-[-20px]">
+                                <textarea className={`self-center w-full min-h-[126px] pt-1 px-2 pb-5 bg-gray-100 border border-gray-300 ${textNum ? 'bg-white' : 'bg-gray-100'} rounded-lg box-border resize-none outline-none overflow-hidden
+                                focus:bg-white focus:shadow-lg focus:border-gray-400 ${exceedTextLim&&'!border-red-600'}` } style={{height: 'auto'}} placeholder="输入内容"
+                                onInput={handleTextInput} value={text}/>
+                            </div>
+                            <div className={`absolute bottom-2 right-2 text-sm text-gray-500 ${exceedTextLim&&'!text-red-600'}`}>{textNum}/{maxTextNum}</div>
                         </div>
                         <input type="file" id='file_upload' className="hidden" onChange={handleFileChange}/>{/* 我觉得dragover导致的内部元素变化会导致input在里面的话会被刷新 */}
                         <div className={`flex flex-col items-center justify-center h-60 mt-6 border border-gray-300 rounded-lg

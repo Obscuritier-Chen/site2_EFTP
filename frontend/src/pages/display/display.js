@@ -14,8 +14,6 @@ import { ReactComponent as FileIcon } from "../../components/upload_resources/sv
 import defaultAvatar from '../../assets/images/defaultAvatar.png'
 
 const Display=()=>{
-    
-
     return(
         <PageContainer>
             <Header/>
@@ -67,7 +65,7 @@ const Display=()=>{
                     <div className="w-full px-2 py-4 break-all">
                         &nbsp;&nbsp;&nbsp;&nbsp;testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
                         testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
-                        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+                        testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest&lt;
                     </div>
                     <div className="flex flex-row items-center justify-center w-full">
                         <div className="border-b border-gray-400 w-[49%]"/>

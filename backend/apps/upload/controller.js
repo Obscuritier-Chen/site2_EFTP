@@ -87,6 +87,7 @@ const handlePostUploadText=async(ctx)=>{
 const handlePostRequireUploadToken=async(ctx)=>{
     const uploadTokenTimeout=1000*60*20;
     const maxFilsSize=524288000;
+    const maxTextNum=6000;
 
     [ok, user]=await checkUser(ctx);
 
@@ -103,6 +104,7 @@ const handlePostRequireUploadToken=async(ctx)=>{
     const filesNum=ctx.request.body.filesNum;
     const filesSize=ctx.request.body.filesSize;
     const title=ctx.request.body.title;
+    const text=ctx.request.body.text;
 
     process.stdout.write("Hello from stdout\n");
 
@@ -136,8 +138,30 @@ const handlePostRequireUploadToken=async(ctx)=>{
         return;
     }
 
+    if(text.length>maxTextNum)
+        {
+            ctx.status=400;
+            ctx.body={
+                code: 6,
+                message: 'text is too long',
+            };
+            return;
+        }
+    
+    const regex = /^(?!.*[<>])(?!.*\s)(?!.*\n).*$/;
+    if(!regex.test(text))
+    {
+        ctx.status=400;
+        ctx.body={
+            code: 7,
+            message: 'text format error',
+        };
+        return;
+    }
+
     const newUploadedFiles=new UploadFiles({
         title,
+        text,
         files: [],
         userObjectId: user._id,
     });
