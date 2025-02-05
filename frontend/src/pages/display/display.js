@@ -101,7 +101,7 @@ const Display=()=>{
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" className="cursor-pointer ml-4 transition-all ease-in-out duration-300 hover:translate-y-[4px] hover:fill-red-600" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
                         </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="32" height="32" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="cursor-pointer ml-4 hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="32" height="32" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" className="cursor-pointer ml-4 hover:scale-105">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                         </svg>
                     </div>
