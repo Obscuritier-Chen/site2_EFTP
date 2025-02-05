@@ -9,10 +9,21 @@ const handleGetDisplay=async(ctx)=>{
     const objectId=ctx.params.objectId;
 
     const resourceObjectId=new mongoose.Types.ObjectId(objectId);
+
+    console.log(type, objectId)
+
+    if(!type||!objectId)
+    {
+        ctx.status=404;
+        ctx.body={
+            code: 3,
+            message: 'resource is not found'
+        }
+    }
     
     if(type!=='text'&&type!=='files')
     {
-        ctx.status=400;
+        ctx.status=404;
         ctx.body={
             code: 2,
             message: 'invalid type',
@@ -31,7 +42,7 @@ const handleGetDisplay=async(ctx)=>{
             ctx.status=404;
             ctx.body={
                 code: 3,
-                message: 'resouce is not found'
+                message: 'resource is not found'
             }
             return
         }
@@ -53,7 +64,7 @@ const handleGetDisplay=async(ctx)=>{
             ctx.status=404;
             ctx.body={
                 code: 3,
-                message: 'resouce is not found'
+                message: 'resource is not found'
             }
             return;
         }
