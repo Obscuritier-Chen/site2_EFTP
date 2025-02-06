@@ -4,7 +4,9 @@ const UploadTextSchema = new mongoose.Schema({
     title: { type: String, required: true },
     text: { type: String, required: true },
     uploadedAt: { type: Date, default: Date.now },
-    userObjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } //一个ObjectId类型 关联了User模型 可以通过这个直接查询到user
+    userObjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, //一个ObjectId类型 关联了User模型 可以通过这个直接查询到user
+    likeNum: {type: String, default: 0},
+    dislikeNum: {type: String, default: 0},
 });
 
 UploadTextSchema.statics.findByUserId = async function(userObjectId){
