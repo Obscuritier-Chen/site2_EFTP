@@ -49,6 +49,7 @@ const handleGetDisplay=async(ctx)=>{
 
         const textAuthor=await User.findById(UploadTextInfo.userObjectId);
 
+        responseBody.type='text';
         responseBody.title=UploadTextInfo.title;
         responseBody.text=UploadTextInfo.text;
         responseBody.uploadedAt=UploadTextInfo.uploadedAt;
@@ -85,9 +86,10 @@ const handleGetDisplay=async(ctx)=>{
 
         const textAuthor=await User.findById(UploadFilesInfo.userObjectId);
 
+        responseBody.type='files';
         responseBody.title=UploadFilesInfo.title;
         responseBody.text=UploadFilesInfo.text;
-        responseBody.uploadedAt=UploadFilesInfo.uploadedAt;
+        responseBody.createdAt=UploadFilesInfo.createdAt;
         responseBody.author=textAuthor.username;
         responseBody.files=files;
     }
