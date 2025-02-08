@@ -61,7 +61,11 @@ const handleGetDisplay=async(ctx)=>{
             return
         }
 
+        UploadTextInfo.viewNum++;
+
         const textAuthor=await User.findById(UploadTextInfo.userObjectId);
+
+        await UploadTextInfo.save();
 
         responseBody.type='text';
         responseBody.title=UploadTextInfo.title;
@@ -115,7 +119,7 @@ const handleGetDisplay=async(ctx)=>{
     ctx.body=responseBody;
 };
 
-async function handleEvalueCreate(type, resourceObjectId, userObjectId, existedEvalueData, evaluation)
+async function handleEvalueCreate(type, resourceObjectId, userObjectId, existedEvalueData, evaluation, TargetUploadedResource)
 {
     if(existedEvalueData)
         return [8, 'already evalued'];
@@ -132,20 +136,28 @@ async function handleEvalueCreate(type, resourceObjectId, userObjectId, existedE
 
     await newEvalueData.save();
 
+    evaluation==='like' ? TargetUploadedResource.likeNum++ : TargetUploadedResource.dislikeNum++;
+    TargetUploadedResource.save();
+
     return [1, 'evaluation is uploaded successfully'];
 }
 
-async function handleEvalueDelete(_, _, _,existedEvalueData, _)
+async function handleEvalueDelete(_, _, _,existedEvalueData, _, TargetUploadedResource)
 {
     if(!existedEvalueData)
         return [9, 'is not evalued'];
 
+    const evaluation=existedEvalueData.evaluation;
+
     await existedEvalueData.deleteOne();
+
+    evaluation==='like' ? TargetUploadedResource.likeNum-- : TargetUploadedResource.dislikeNum--;
+    TargetUploadedResource.save();
 
     return [1, 'evaluation is deleted successfully'];
 }
 
-async function handleEvalueUpdate(_, _, _,existedEvalueData, _)
+async function handleEvalueUpdate(_, _, _,existedEvalueData, _, TargetUploadedResource)
 {
     if(!existedEvalueData)
         return [9, 'is not evalued'];
@@ -153,6 +165,21 @@ async function handleEvalueUpdate(_, _, _,existedEvalueData, _)
     existedEvalueData.evaluation= existedEvalueData.evaluation==='like' ? 'dislike' : 'like';
 
     await existedEvalueData.save();
+
+    const evaluation=existedEvalueData.evaluation;
+
+    if(evaluation==='dislike')
+    {
+        TargetUploadedResource.likeNum--;
+        TargetUploadedResource.dislikeNum++;
+    }
+    else if(evaluation==='like')
+    {
+        TargetUploadedResource.likeNum++;
+        TargetUploadedResource.dislikeNum--;
+    }
+        
+    TargetUploadedResource.save();
 
     return [1, 'evaluation is updated successfully'];
 }
@@ -247,7 +274,7 @@ const handleUploadEvalue=async(ctx)=>{
             code: 6,
             message: 'resource is not found'
         }
-        return
+        return;
     }
 
     const existedEvalueData=await (type==='text' ? TextEvalue.findOne({
@@ -260,7 +287,7 @@ const handleUploadEvalue=async(ctx)=>{
 
     if(action!=='fetch')
     {
-        [code, message]=await actionFunc(type, orginalResourceObjectId, originalUserObjectId, existedEvalueData, evaluation);
+        [code, message]=await actionFunc(type, orginalResourceObjectId, originalUserObjectId, existedEvalueData, evaluation, TargetUploadedResource);
 
         ctx.status= code===1 ? 200 : 400;
         ctx.body={
