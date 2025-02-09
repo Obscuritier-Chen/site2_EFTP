@@ -72,6 +72,10 @@ const handleGetDisplay=async(ctx)=>{
         responseBody.text=UploadTextInfo.text;
         responseBody.uploadedAt=UploadTextInfo.uploadedAt;
         responseBody.author=textAuthor.username;
+        responseBody.viewNum=UploadTextInfo.viewNum;
+        responseBody.likeNum=UploadTextInfo.likeNum;
+        responseBody.dislikeNum=UploadTextInfo.dislikeNum;
+        responseBody.downloadNum=UploadTextInfo.downloadNum;
     }
 
     else if(type==='files')
@@ -110,6 +114,10 @@ const handleGetDisplay=async(ctx)=>{
         responseBody.createdAt=UploadFilesInfo.createdAt;
         responseBody.author=textAuthor.username;
         responseBody.files=files;
+        responseBody.viewNum=UploadFilesInfo.viewNum;
+        responseBody.likeNum=UploadFilesInfo.likeNum;
+        responseBody.dislikeNum=UploadFilesInfo.dislikeNum;
+        responseBody.downloadNum=UploadFilesInfo.downloadNum;
     }
 
     responseBody.code=1;
@@ -303,7 +311,7 @@ const handleUploadEvalue=async(ctx)=>{
 
         ctx.status= code===1 ? 200 : 400;
         ctx.body={
-            userEvaluation,
+            evaluation: userEvaluation,
             code,
             message,
         }
