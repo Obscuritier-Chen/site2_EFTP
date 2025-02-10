@@ -194,7 +194,7 @@ async function handleEvalueUpdate(_, _, _,existedEvalueData, _, TargetUploadedRe
 
 async function handleEvalueFetch(_, _, _,existedEvalueData, _)
 {
-    const evaluation=!existedEvalueData.evaluation ? null : existedEvalueData.evaluation;
+    const evaluation=!existedEvalueData ? null : existedEvalueData.evaluation;
 
     return [evaluation, 1, 'evaluation is fetched successfully']
 }

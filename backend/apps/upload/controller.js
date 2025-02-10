@@ -307,7 +307,7 @@ const handlePostUploadFiles=async(ctx)=>{
 
     const newUploadFiles=await UploadFiles.findById(tokenContent.UploadFilesId);
 
-    const filePath=path.join(__dirname, '../../uplaods', file.newFilename);//获取文件路径
+    const filePath=path.join(__dirname, '../../uploads', file.newFilename);//获取文件路径
 
     const newFileData=new File({//保存到数据库
         filename: file.newFilename,
