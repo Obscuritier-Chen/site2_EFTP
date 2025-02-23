@@ -7,6 +7,7 @@ const signupRouter=require('../apps/signup/router');
 const loginRouter=require('../apps/login/router');
 const uploadRouter=require('../apps/upload/router');
 const displayRouter=require('../apps/display/router');
+const searchRouter=require('../apps/search/router');
 
 const router=new Router();
 
@@ -18,5 +19,6 @@ router.use('/signup/api', signupRouter.routes());
 router.use('/login/api', loginRouter.routes());
 router.use('/upload/api', uploadRouter.routes());
 router.use('/display/api', displayRouter.routes());
+router.use('/search/api', searchRouter.routes());
 
 module.exports=router;
