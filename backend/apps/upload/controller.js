@@ -233,10 +233,10 @@ const handlePostDeclareUploadOver=async(ctx)=>{
 
     //console.log(tokenContent);
 
+    const newUploadFiles=await UploadFiles.findById(tokenContent.UploadFilesId);
+
     if(tokenContent.currentFilesNum!==tokenContent.filesNum)
     {
-        const newUploadFiles=await UploadFiles.findById(tokenContent.UploadFilesId);
-
         const files=newUploadFiles.files;
 
         for(let i=0; i<files.length; i++)
@@ -264,6 +264,9 @@ const handlePostDeclareUploadOver=async(ctx)=>{
         };
         return;
     }
+
+    UploadFiles.size=tokenContent.currentFilesSize;
+    await UploadFiles.save();
 
     uploadToken.delete(token);
 
