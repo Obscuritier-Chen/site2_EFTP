@@ -265,8 +265,8 @@ const handlePostDeclareUploadOver=async(ctx)=>{
         return;
     }
 
-    UploadFiles.size=tokenContent.currentFilesSize;
-    await UploadFiles.save();
+    newUploadFiles.size=tokenContent.currentFilesSize;
+    await newUploadFiles.save();
 
     uploadToken.delete(token);
 
