@@ -30,8 +30,8 @@ const queryDatabase=async(q, type, size, time, page)=>{
 
     const perPage=40;
     const skip=(page-1)*40;
-
-    const queryResult = await UploadText.aggregate([
+    
+    let [{queryResult, totalDataNum}]= await UploadText.aggregate([
         { 
             $addFields: { source: "UploadText" } 
         },
@@ -53,19 +53,17 @@ const queryDatabase=async(q, type, size, time, page)=>{
                                 if: { $eq: ['$source', 'UploadFiles'] },
                                 then: {
                                     $and: [
-                                        {
-                                            $cond: {
-                                                if: { $eq: [sizeToMaxsize[size], null] }, // 如果 sizeToMaxsize[size] 为 null
-                                                then: true,        // 则条件始终为 true (取消上限限制)
-                                                else: { $lte: ['$size', sizeToMaxsize[size]] } // 否则应用 <= 上限 限制
-                                            }
+                                        { 
+                                            $or: [
+                                                { $eq: [sizeToMaxsize[size], null] }, 
+                                                { $lte: ['$size', sizeToMaxsize[size]] }
+                                            ] 
                                         },
-                                        {
-                                            $cond: {
-                                                if: { $eq: [sizeToMinsize[size], null] }, // 如果 sizeToMinsize[size] 为 null
-                                                then: true,        // 则条件始终为 true (取消下限限制)
-                                                else: { $gte: ['$size', sizeToMinsize[size]] } // 否则应用 >= 下限 限制
-                                            }
+                                        { 
+                                            $or: [
+                                                { $eq: [sizeToMinsize[size], null] }, 
+                                                { $gte: ['$size', sizeToMinsize[size]] }
+                                            ] 
                                         }
                                     ]
                                 },
@@ -81,32 +79,37 @@ const queryDatabase=async(q, type, size, time, page)=>{
                                 else: { $gte: ['$createdAt', timeTodate[time]] }
                             }
                         }
-                    }
+                    },
+                    ...(type === 'all' ? [] : [{ source: type === 'text' ? 'UploadText' : 'UploadFiles' }])
                 ]
             }
         },
         {
-            $addFields: {
-                timestamp: { $ifNull: ['$uploadedAt', '$createdAt'] }
+            $facet: {
+                queryResult: [
+                    {
+                        $addFields: {
+                            timestamp: { $ifNull: ['$uploadedAt', '$createdAt'] }
+                        }
+                    },
+                    {
+                        $sort: { timestamp: -1 }
+                    },
+                    {
+                        $skip: skip,
+                    },
+                    {
+                        $limit: perPage,
+                    }
+                ],
+                totalDataNum: [{$count: 'totalDataNum'}],
             }
         },
-        {
-            $sort: { timestamp: -1 }
-        },
-        {
-            $skip: skip,
-        },
-        {
-            $limit: perPage,
-        }
     ]).exec();
 
-    return queryResult.map(doc=>{
-        return {
-            timestamp: doc.timestamp,
-            source: doc.source,
-        }
-    });
+    totalDataNum=totalDataNum[0].totalDataNum;
+
+    return [queryResult, totalDataNum];
 }
 
 module.exports=queryDatabase;
