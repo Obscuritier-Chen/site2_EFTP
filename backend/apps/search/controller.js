@@ -1,7 +1,7 @@
 const queryDatabase=require('./queryDB');
 
 const handleGetSearchInfo=async(ctx)=>{
-    const {q, type='all', size='all', time='all', page=1}=ctx.query;
+    const {q='', type='all', size='all', time='all', page=1}=ctx.query;
 
     [queryResult, totalDataNum]=await queryDatabase(q, type, size, time, page);
 

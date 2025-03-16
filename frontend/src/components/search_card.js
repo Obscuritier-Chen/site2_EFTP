@@ -1,16 +1,24 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import classNames from "classnames";
 import { produce } from "immer";
 
 import SearchBox from "./search_box";
 
-const SearchCard=()=>{
+const SearchCard=({urlFilterChoices, setOuterFilterChoices})=>{
     const [folded, setFolded]=useState(true);
     const [filterChoices, setFilterChoices]=useState({
         type: 'all',
         size: 'all',
         time: 'all',
     });
+
+    useEffect(()=>{
+        setOuterFilterChoices(filterChoices);
+    }, [filterChoices, setOuterFilterChoices])
+
+    /*useEffect(()=>{ 导致了无限循环渲染
+        setFilterChoices(urlFilterChoices);
+    }, [urlFilterChoices])*/
     
     function handleFilterOptClick(attr, choice)
     {
@@ -23,7 +31,7 @@ const SearchCard=()=>{
 
     return(
         <div className="flex flex-col">
-            <SearchBox/>
+            <SearchBox filterChoices={filterChoices}/>
             <div className="flex flex-col mt-1 mx-0.5 py-1 px-0.5">
                 <div className="flex flex-row items-center mb-0.5">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"

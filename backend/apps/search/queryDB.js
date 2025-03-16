@@ -107,7 +107,7 @@ const queryDatabase=async(q, type, size, time, page)=>{
         },
     ]).exec();
 
-    totalDataNum=totalDataNum[0].totalDataNum;
+    totalDataNum.length ? totalDataNum=totalDataNum[0].totalDataNum : totalDataNum=0;
 
     return [queryResult, totalDataNum];
 }

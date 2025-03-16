@@ -5,6 +5,7 @@ import Signup from "./pages/signup";
 import Login from './pages/login';
 import Upload from './pages/upload';
 import Display from "./pages/display";
+import Search from "./pages/search";
 
 const App=()=>{
     return(
@@ -15,6 +16,7 @@ const App=()=>{
                 <Route exact path="/login" element={<Login/>}/>
                 <Route exact path="/upload/*" element={<Upload/>}/>
                 <Route exact path="/display/*" element={<Display/>}/>
+                <Route exact path="/search/*" element={<Search/>}/>
             </Routes>
         </Router>
     );
