@@ -1,29 +1,54 @@
 import React, {useState, useEffect} from "react";
 import classNames from "classnames";
 import { produce } from "immer";
+import { useLocation } from "react-router-dom";
 
 import SearchBox from "./search_box";
 
-const SearchCard=({urlFilterChoices, setOuterFilterChoices})=>{
+const SearchCard=({setOuterFilterChoices})=>{
     const [folded, setFolded]=useState(true);
     const [filterChoices, setFilterChoices]=useState({
         type: 'all',
         size: 'all',
         time: 'all',
+        editor: 'url',
     });
 
     useEffect(()=>{
-        setOuterFilterChoices(filterChoices);
-    }, [filterChoices, setOuterFilterChoices])
+        if(setOuterFilterChoices&&filterChoices.editor==='user')
+        {
+            setOuterFilterChoices({
+                type: filterChoices.type,
+                size: filterChoices.size,
+                time: filterChoices.time,
+            });
+        }
+            
+    }, [filterChoices])
 
-    /*useEffect(()=>{ 导致了无限循环渲染
+    const Locaction=useLocation();
+    useEffect(()=>{
+        const params = new URLSearchParams(window.location.search);
+        const urlFilterChoices={
+            type: 'all',
+            size: 'all',
+            time: 'all',
+            editor: 'url',
+        };
+        params.forEach((value, key) => {
+            if (key !== 'q') {
+            urlFilterChoices[key] = value;
+            }
+        });
+
         setFilterChoices(urlFilterChoices);
-    }, [urlFilterChoices])*/
+    }, [Locaction.search])
     
     function handleFilterOptClick(attr, choice)
     {
         setFilterChoices((preChoices)=>produce(preChoices, draft=>{
             draft[attr]=choice;
+            draft.editor='user';
         }));
     }
 
@@ -70,4 +95,4 @@ const SearchCard=({urlFilterChoices, setOuterFilterChoices})=>{
     )
 };
 
-export default SearchCard;
+export default React.memo(SearchCard);

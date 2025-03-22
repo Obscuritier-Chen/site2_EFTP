@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 
@@ -9,18 +9,29 @@ import Header from "../../components/header";
 import Content from "../../components/content";
 const Search=()=>{
     const [searchResult, setSearchResult]=useState([]);
-    const isFirstRender=useRef(true);
-    const [outerFilterChoices, setOuterFilterChoices]=useState({
+    const outerFilterChoices=useRef({
         type: 'all',
         size: 'all',
         time: 'all',
-    });
+    })
+
+    function handleOuterFilterChoicesChange()
+    {
+        const regex = /q=[^&]*/;
+        const q=window.location.search.match(regex) ? window.location.search.match(regex)[0] : '';
+        let search=window.location.search ? `?${q}` : '?';
+        for(let key in outerFilterChoices.current)
+            if(outerFilterChoices.current[key]!=='all')
+                search+=`&${key}=${outerFilterChoices.current[key]}`;
+        getFilterResult(search)
+    }
+
+    const setOuterFilterChoices=useCallback((newChoices)=>{
+        outerFilterChoices.current=newChoices;
+        handleOuterFilterChoicesChange()
+    },[])
+
     const Locaction=useLocation();
-    let urlFilterChoices={
-        type: 'all',
-        size: 'all',
-        time: 'all',
-    };
 
     function getSearchResult()
     {
@@ -42,13 +53,6 @@ const Search=()=>{
 
     useEffect(()=>{
         getSearchResult();
-
-        const params = new URLSearchParams(window.location.search);
-        params.forEach((value, key) => {
-            if (key !== 'q') {
-              urlFilterChoices[key] = value;
-            }
-        });
     },[Locaction.search])
 
     function getFilterResult(search)
@@ -69,27 +73,12 @@ const Search=()=>{
         })
     }
 
-    useEffect(()=>{
-        if(isFirstRender.current)
-        {
-            isFirstRender.current=false;
-            return;
-        }
-        
-        const regex = /q=[^&]*/;
-        let search=window.location.search ? `?${window.location.search.match(regex)[0]}` : '?';
-        for(let key in outerFilterChoices)
-            if(outerFilterChoices[key]!=='all')
-                search+=`&${key}=${outerFilterChoices[key]}`;
-        getFilterResult(search)
-    },[outerFilterChoices])
-
     return(
         <PageContainer>
             <Header/>
             <Content>
                 <div className="mt-5">
-                    <SearchCard setOuterFilterChoices={setOuterFilterChoices} urlFilterChoices={urlFilterChoices}/>
+                    <SearchCard setOuterFilterChoices={setOuterFilterChoices}/>
                 </div>
                 <div className="grid w-full mt-5 grid-cols-4 gap-x-4 gap-y-8">
                     {
