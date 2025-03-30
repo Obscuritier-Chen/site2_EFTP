@@ -35,10 +35,8 @@ const Header=()=>{
             <div className="logo font-mono text-2xl cursor-pointer" onClick={()=>{navigate('/')}}>EFTP</div>
             <nav className="ml-6">
                 <ul className="list-none m-0">
-                    <li className={nav_li}>test1</li>
-                    <li className={nav_li}>test2</li>
-                    <li className={nav_li}>test3</li>
-                    <li className={nav_li}>test4</li>
+                    <li className={nav_li} onClick={()=>{navigate('/upload')}}>上传资源</li>
+                    <li className={nav_li} onClick={()=>{navigate('/search')}}>浏览资源</li>
                 </ul>
             </nav>
             {loginStatus ? <LoginNavRight username={username}/> : <UnloginNavRight/>}
